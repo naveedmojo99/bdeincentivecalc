@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BDE Incentive Calculator</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    padding:15px;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+}
+
+.card{
+    background:#fff;
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+h1{
+    text-align:center;
+    color:#0d6efd;
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin-top:15px;
+    margin-bottom:6px;
+    font-weight:600;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    margin-top:15px;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.generate{
+    background:#0d6efd;
+    color:white;
+}
+
+.copy{
+    background:#198754;
+    color:white;
+}
+
+.info{
+    background:#eef5ff;
+    padding:12px;
+    border-radius:10px;
+    margin-top:10px;
+    font-weight:600;
+}
+
+.slab{
+    padding:12px;
+    border-radius:10px;
+    margin-top:10px;
+    font-weight:600;
+}
+
+.achieved{
+    background:#d1f7dc;
+    color:#0f5132;
+    border:1px solid #95d5a5;
+}
+
+.pending{
+    background:#ffe2e2;
+    color:#842029;
+    border:1px solid #ffb3b3;
+}
+
+.output{
+    margin-top:20px;
+    padding:15px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    background:#fafafa;
+    white-space:pre-wrap;
+    line-height:1.7;
+}
+
+@media(max-width:600px){
+    h1{
+        font-size:22px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>BDE Incentive Calculator</h1>
+
+<label>BDE Name</label>
+<input type="text" id="name" placeholder="Enter BDE Name">
+
+<label>Work Type</label>
+<select id="workType">
+    <option value="12000">WFH (₹12,000)</option>
+    <option value="15000">WFO (₹15,000)</option>
+</select>
+
+<label>Category</label>
+<select id="category">
+    <option value="13">Starters (0-3 Months)</option>
+    <option value="16">Builders (4-6 Months)</option>
+    <option value="20">Drivers (7-12 Months)</option>
+    <option value="23">Masters (12+ Months)</option>
+</select>
+
+<label>Current Revenue</label>
+<input type="number" id="revenue" placeholder="Enter Revenue">
+
+<button class="generate" onclick="calculate()">
+Generate Report
+</button>
+
+<div id="summary"></div>
+
+<div class="output" id="output"></div>
+
+<button class="copy" onclick="copyText()">
+Copy WhatsApp Text
+</button>
+
+</div>
+</div>
+
+<script>
+
+function slabCard(revenue,target,label){
+
+    if(revenue >= target){
+        return `
+        <div class="slab achieved">
+            ✅ ${label} Achieved
+        </div>`;
+    }
+
+    return `
+    <div class="slab pending">
+        ❌ ${label} - Need ₹${(target-revenue).toLocaleString()}
+    </div>`;
+}
+
+function slabText(revenue,target,label){
+
+    if(revenue >= target){
+        return `✅ ${label} Achieved`;
+    }
+
+    return `❌ Revenue Needed for ${label}: ₹${(target-revenue).toLocaleString()}`;
+}
+
+function calculate(){
+
+    const name =
+    document.getElementById("name").value || "N/A";
+
+    const salary =
+    Number(document.getElementById("workType").value);
+
+    const revenue =
+    Number(document.getElementById("revenue").value);
+
+    const categorySelect =
+    document.getElementById("category");
+
+    const category =
+    categorySelect.options[
+        categorySelect.selectedIndex
+    ].text.split("(")[0].trim();
+
+    const multiplier =
+    Number(categorySelect.value);
+
+    const monthlyTarget =
+    salary * multiplier;
+
+    // Incentive Slabs
+    const gate = salary * 5;
+    const slab3 = salary * 5;
+    const slab4 = salary * 7;
+    const slab6 = salary * 10;
+    const slab65 = salary * 16;
+    const slab7 = salary * 20;
+    const slab8 = salary * 25;
+
+    let achieved = "Not Eligible";
+
+    if(revenue >= slab8){
+        achieved = "8%";
+    }
+    else if(revenue >= slab7){
+        achieved = "7%";
+    }
+    else if(revenue >= slab65){
+        achieved = "6.5%";
+    }
+    else if(revenue >= slab6){
+        achieved = "6%";
+    }
+    else if(revenue >= slab4){
+        achieved = "4%";
+    }
+    else if(revenue >= slab3){
+        achieved = "3%";
+    }
+
+    document.getElementById("summary").innerHTML = `
+
+        <div class="info">
+            🎯 Monthly Target: ₹${monthlyTarget.toLocaleString()}
+        </div>
+
+        <div class="info">
+            🏆 Current Incentive Slab: ${achieved}
+        </div>
+
+        <div class="info">
+            💰 Current Revenue: ₹${revenue.toLocaleString()}
+        </div>
+
+        ${slabCard(revenue,gate,"Gate Opener")}
+        ${slabCard(revenue,slab3,"3% Slab")}
+        ${slabCard(revenue,slab4,"4% Slab")}
+        ${slabCard(revenue,slab6,"6% Slab")}
+        ${slabCard(revenue,slab65,"6.5% Slab")}
+        ${slabCard(revenue,slab7,"7% Slab")}
+        ${slabCard(revenue,slab8,"8% Slab")}
+    `;
+
+    // AUTO CURRENT DATE
+    const today = new Date();
+
+    const formattedDate =
+    String(today.getDate()).padStart(2,"0") + "/" +
+    String(today.getMonth()+1).padStart(2,"0") + "/" +
+    String(today.getFullYear()).slice(-2);
+
+    const whatsappText =
+
+`*Morning Update*
+
+BDE Name: ${name}
+Date: ${formattedDate}
+
+Total Revenue This Month: ₹${revenue.toLocaleString()}
+
+${slabText(revenue,gate,"Gate Opener")}
+
+${slabText(revenue,slab3,"3% Slab")}
+
+${slabText(revenue,slab4,"4% Slab")}
+
+${slabText(revenue,slab6,"6% Slab")}
+
+${slabText(revenue,slab65,"6.5% Slab")}
+
+${slabText(revenue,slab7,"7% Slab")}
+
+${slabText(revenue,slab8,"8% Slab")}
+
+Category : ${category}
+
+Current Incentive Slab : ${achieved}
+
+Monthly Target : ₹${monthlyTarget.toLocaleString()}
+`;
+
+    document.getElementById("output").textContent =
+    whatsappText;
+}
+
+function copyText(){
+
+    const text =
+    document.getElementById("output").textContent;
+
+    navigator.clipboard.writeText(text)
+    .then(() => {
+        alert("Copied Successfully!");
+    });
+}
+
+</script>
+
+</body>
+</html>
