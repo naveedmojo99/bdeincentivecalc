@@ -126,11 +126,7 @@ button{
 <label>BDE Name</label>
 <input type="text" id="name" placeholder="Enter BDE Name">
 
-<label>Work Type</label>
-<select id="workType">
-    <option value="12000">WFH (₹12,000)</option>
-    <option value="15000">WFO (₹15,000)</option>
-</select>
+<label>Work Type</label> <select id="workType" onchange="toggleCustomSalary()"> <option value="12000">WFH (₹12,000)</option> <option value="15000">WFO (₹15,000)</option> <option value="custom">Other Salary</option> </select> <div id="customSalaryDiv" style="display:none;"> <label>Custom Salary</label> <input type="number" id="customSalary" placeholder="Enter Salary"> </div>
 
 <label>Category</label>
 <select id="category">
@@ -184,13 +180,14 @@ function slabText(revenue,target,label){
     return `❌ Revenue Needed for ${label}: ₹${(target-revenue).toLocaleString()}`;
 }
 
+function toggleCustomSalary(){ const workType = document.getElementById("workType").value; const customSalaryDiv = document.getElementById("customSalaryDiv"); if(workType === "custom"){ customSalaryDiv.style.display = "block"; }else{ customSalaryDiv.style.display = "none"; } }
+
 function calculate(){
 
     const name =
     document.getElementById("name").value || "N/A";
 
-    const salary =
-    Number(document.getElementById("workType").value);
+    let salary; const workType = document.getElementById("workType").value; if(workType === "custom"){ salary = Number(document.getElementById("customSalary").value); if(!salary || salary <= 0){ alert("Please enter a valid salary"); return; } }else{ salary = Number(workType); }
 
     const revenue =
     Number(document.getElementById("revenue").value);
